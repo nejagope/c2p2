@@ -189,8 +189,56 @@ void INICIO(NodoAST raiz) :
 void EXPRESION(NodoAST padre) :
 {}
 {
-    EXP_SUM_RES(padre)
+    EXP_OR(padre)
 }
+
+void EXP_OR(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_OR", padre);}
+{
+	EXP_XOR(nodoNuevo) (OR(nodoNuevo) EXP_XOR(nodoNuevo))*
+}
+
+void EXP_XOR(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_XOR", padre);}
+{
+	EXP_AND(nodoNuevo) ( XOR(nodoNuevo) EXP_AND(nodoNuevo))*
+}
+
+void EXP_AND(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_AND", padre);}
+{
+	EXP_OR_PIPE(nodoNuevo) ( AND(nodoNuevo) EXP_OR_PIPE(nodoNuevo))*
+}
+
+void EXP_OR_PIPE(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_OR", padre);}
+{
+	EXP_AND_AMPERSAND(nodoNuevo) ( OR_PIPE(nodoNuevo) EXP_AND_AMPERSAND(nodoNuevo))*
+}
+
+void EXP_AND_AMPERSAND(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_AND", padre);}
+{
+	EXP_COMPARACION(nodoNuevo) ( AND_AMPERSAND(nodoNuevo) EXP_COMPARACION(nodoNuevo))*
+}
+
+void EXP_COMPARACION(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_COMP", padre);}
+{
+    EXP_REL(nodoNuevo) 
+		[(IGUAL(nodoNuevo) | NO_IGUAL(nodoNuevo) | IDENTICO(nodoNuevo) | NO_IDENTICO(nodoNuevo)) 
+		EXP_REL(nodoNuevo)]
+}
+
+void EXP_REL(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_REL", padre);}
+{
+    EXP_SUM_RES(nodoNuevo) 
+		[(MAYOR(nodoNuevo) | MENOR(nodoNuevo) | MAYORI(nodoNuevo) | MENORI(nodoNuevo)) 
+		EXP_SUM_RES(nodoNuevo)]
+}
+
+//************************ OPERACIONES ARITMETICAS **********************************
 
 void EXP_SUM_RES(NodoAST padre) :
 {NodoAST nodoNuevo = new NodoAST("EXP_SUM_RES", padre);}
