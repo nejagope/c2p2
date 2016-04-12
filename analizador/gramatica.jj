@@ -183,17 +183,35 @@ TOKEN :
 void INICIO(NodoAST raiz) :
 {}
 {
-    (EXPRESION(raiz))+ [<EOF>]
+    (EXPRESION(raiz)) [<EOF>]
 }
 
 void EXPRESION(NodoAST padre) :
 {}
 {
-    EXP_UNARIA(padre)
+    EXP_SUM_RES(padre)
+}
+
+void EXP_SUM_RES(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_SUM_RES", padre);}
+{
+    EXP_MUL_DIV_MOD(nodoNuevo) ((MAS(nodoNuevo) | MENOS(nodoNuevo)) EXP_MUL_DIV_MOD(nodoNuevo))*
+}
+
+void EXP_MUL_DIV_MOD(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_MUL_DIV_MOD", padre);}
+{
+    EXP_POTENCIA(nodoNuevo) ((POR(nodoNuevo) | DIV(nodoNuevo) | MODULO(nodoNuevo)) EXP_POTENCIA(nodoNuevo))*
+}
+
+void EXP_POTENCIA(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_POTENCIA", padre);}
+{
+    EXP_UNARIA(nodoNuevo) (POTENCIA(nodoNuevo) EXP_UNARIA(nodoNuevo))*
 }
 
 void EXP_UNARIA(NodoAST padre) :
-{NodoAST nodoNuevo = new NodoAST("INC_DEC", padre);}
+{NodoAST nodoNuevo = new NodoAST("EXP_UNARIA", padre);}
 {
     MENOS(nodoNuevo) EXP_MAYOR_PRECEDENCIA(nodoNuevo)
 |   NOT (nodoNuevo) EXP_MAYOR_PRECEDENCIA(nodoNuevo)
@@ -222,7 +240,10 @@ void VARIABLE(NodoAST padre) :
 {Token t;}
 {
 	t= <VARIABLE>
-	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.variable, padre);}
+	{
+		NodoAST nodoVar = new NodoAST("VAR", t.beginLine, t.beginColumn, TipoNodo.variable, padre);
+		nodoVar.lexema = t.image;
+	}
 }
 
 
