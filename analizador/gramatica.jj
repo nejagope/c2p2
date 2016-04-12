@@ -243,6 +243,7 @@ void VARIABLE(NodoAST padre) :
 	{
 		NodoAST nodoVar = new NodoAST("VAR", t.beginLine, t.beginColumn, TipoNodo.variable, padre);
 		nodoVar.lexema = t.image;
+                nodoVar.lexema = nodoVar.lexema.substring(1, nodoVar.lexema.length());
 	}
 }
 
