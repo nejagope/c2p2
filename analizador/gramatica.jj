@@ -1,0 +1,436 @@
+options {
+  STATIC = false;
+  JAVA_UNICODE_ESCAPE = true;
+  KEEP_LINE_COLUMN = true;
+  IGNORE_CASE = false;
+  OUTPUT_DIRECTORY = "C:\\Users\\NELSON\\Documents\\NetBeansProjects\\Compi2_Proyecto2\\src\\analizador";
+}
+
+PARSER_BEGIN(Parser)
+package analizador;
+
+import compilacion.TipoNodo;
+import compilacion.NodoAST;
+
+public class Parser {
+    
+  
+}
+
+PARSER_END(Parser)
+
+/* WHITE SPACE */
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+/* COMENTARIOS */
+
+MORE :
+{
+  "//" : IN_SINGLE_LINE_COMMENT
+|  
+  "/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT
+}
+
+<IN_FORMAL_COMMENT>
+SPECIAL_TOKEN :
+{
+  <FORMAL_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <MULTI_LINE_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT,IN_FORMAL_COMMENT,IN_MULTI_LINE_COMMENT>
+MORE :
+{
+  < ~[] >
+}
+
+/* RESERVED WORDS AND LITERALS */
+
+TOKEN :
+{
+< AND: "and" >
+|	< OR: "or" >
+|	< XOR: "xor" >
+|	< IF: "if" >
+|	< ELSE: "else" >
+|	< WHILE: "while" >
+|	< DO: "do" >
+|	< FOR: "for" >
+|	< BREAK: "break" >
+|	< SWITCH: "switch" >
+|	< CASE: "case" >
+|	< DEFAULT_: "default" >
+|	< FUNCTION: "function" >
+|	< RETURN: "return" >
+|	< TRUE: "true" >
+|	< FALSE: "false" >
+}
+
+/* LITERALS */
+
+TOKEN :
+{
+    < INTEGER_LITERAL: ["0"-"9"] (["0"-"9"])* >
+|
+    < DOUBLE_LITERAL: (["0"-"9"])+ "." (["0"-"9"])* >
+|
+    < STRING_ENTRECOMILLADO_DOBLE:
+      "\""
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\""
+    >
+|
+    < STRING_ENTRECOMILLADO_SIMPLE:
+      "'"
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "'"
+    >
+}
+
+/* IDENTIFIERS */
+
+TOKEN :
+{
+  < ETIQUETA: ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","0"-"9","_"] )* >
+
+| < VARIABLE: "$" ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","0"-"9","_"] )* >
+}
+
+/* SEPARATORS */
+
+TOKEN :
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < COMA: "," >
+
+| < PTOCOMA: ";" >
+| < PUNTO: "." >
+| < FLECHA: "->" >
+}
+
+/* OPERATORS */
+
+TOKEN :
+{
+  < MAS: "+" >
+| < MAS2: "++" >
+| < GUION: "-" >
+| < GUION2: "--" >
+| < ASTERISCO: "*" >
+| < ASTERISCO2: "**" >
+| < BARRA: "/" >
+| < PORCENTAJE: "%" >
+
+| < IGUAL: "=" >
+| < IGUAL2: "==" >
+| < IGUAL3: "===" >
+| < MENOR: "<" >
+| < MAYOR: ">" >
+| < MENORI: "<=" >
+| < MAYORI: ">=" >
+| < EXCLAMACION: "!" >
+| < EXCLAMACION_IGUAL: "!=" >
+| < EXCLAMACION_IGUAL2: "!==" >
+| < MENOR_MAYOR: "<>" >
+
+| < PIPE2: "||" >
+| < AMPERSAND: "&" >
+| < AMPERSAND2: "&&" >
+}
+
+/*****************************************
+ *****************GRAMATICA **************
+ *****************************************/
+ 
+void INICIO(NodoAST raiz) :
+{}
+{
+    (EXPRESION(raiz))+ [<EOF>]
+}
+
+void EXPRESION(NodoAST padre) :
+{}
+{
+    EXP_UNARIA(padre)
+}
+
+void EXP_UNARIA(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("INC_DEC", padre);}
+{
+    MENOS(nodoNuevo) EXP_MAYOR_PRECEDENCIA(nodoNuevo)
+|   NOT (nodoNuevo) EXP_MAYOR_PRECEDENCIA(nodoNuevo)
+|   EXP_MAYOR_PRECEDENCIA(nodoNuevo)
+}
+
+void EXP_MAYOR_PRECEDENCIA(NodoAST padre):
+{}
+{
+    LITERAL(padre) 
+|   VARIABLE(padre) 
+|   <LPAREN> EXPRESION(padre) <RPAREN>
+}
+
+
+void LITERAL(NodoAST padre) :
+{}
+{
+    ENTERO(padre)
+|   DOUBLE(padre)
+|   BOOLEANO(padre)
+|   STRING(padre)
+}
+
+void VARIABLE(NodoAST padre) :
+{Token t;}
+{
+	t= <VARIABLE>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.variable, padre);}
+}
+
+
+
+void MAS(NodoAST padre):
+{Token t;}
+{
+	t= <MAS>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.mas, padre);}
+}
+
+void MENOS(NodoAST padre):
+{Token t;}
+{
+	t= <GUION>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.menos, padre);}
+}
+
+void POR(NodoAST padre):
+{Token t;}
+{
+	t= <ASTERISCO>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.por, padre);}
+}
+
+void DIV(NodoAST padre):
+{Token t;}
+{
+	t= <BARRA>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.div, padre);}
+}
+
+void MODULO(NodoAST padre):
+{Token t;}
+{
+	t= <PORCENTAJE>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.modulo, padre);}
+}
+
+void POTENCIA(NodoAST padre):
+{Token t;}
+{
+	t= <ASTERISCO2>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.potencia, padre);}
+}
+
+void INC(NodoAST padre):
+{Token t;}
+{
+	t= <MAS2>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.inc, padre);}
+}
+
+
+void DEC(NodoAST padre):
+{Token t;}
+{
+	t= <GUION2>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.dec, padre);}
+}
+
+void MENOR(NodoAST padre):
+{Token t;}
+{
+	t= <MENOR>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.menor, padre);}
+}
+
+void MAYOR(NodoAST padre):
+{Token t;}
+{
+	t= <MAYOR>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.mayor, padre);}
+}
+
+void MENORI(NodoAST padre):
+{Token t;}
+{
+	t= <MENORI>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.menorI, padre);}
+}
+
+void MAYORI(NodoAST padre):
+{Token t;}
+{
+	t= <MAYORI>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.mayorI, padre);}
+}
+
+void IGUAL(NodoAST padre):
+{Token t;}
+{
+	t= <IGUAL2>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.igual, padre);}
+}
+
+void IDENTICO(NodoAST padre):
+{Token t;}
+{
+	t= <IGUAL3>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.identico, padre);}
+}
+
+void NO_IGUAL(NodoAST padre):
+{Token t; NodoAST nodo;}
+{
+	t= <EXCLAMACION_IGUAL>
+	{nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.noIgual, padre);}
+    |   t= <MENOR_MAYOR>
+	{nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.noIgual, padre);}
+}
+
+void NO_IDENTICO(NodoAST padre):
+{Token t;}
+{
+	t= <EXCLAMACION_IGUAL2>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.noIdentico, padre);}
+}
+
+void AND(NodoAST padre):
+{Token t;}
+{
+	t= <AND>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.and, padre);}
+}
+
+void AND_AMPERSAND(NodoAST padre):
+{Token t;}
+{
+	t= <AMPERSAND2>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.and, padre);}
+}
+
+void OR(NodoAST padre):
+{Token t;}
+{
+	t= <OR>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.or, padre);}
+}
+
+void OR_PIPE(NodoAST padre):
+{Token t;}
+{
+	t= <PIPE2>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.or, padre);}
+}
+
+void XOR(NodoAST padre):
+{Token t;}
+{
+	t= <XOR>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.xor, padre);}
+}
+
+void NOT(NodoAST padre):
+{Token t;}
+{
+	t= <EXCLAMACION>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.not, padre);}
+}
+
+//************************* LITERALES ************************
+void ENTERO(NodoAST padre) :
+{Token t;}
+{
+	t = <INTEGER_LITERAL>
+	{
+		NodoAST terminalI = new NodoAST("LIT_INT", t.beginLine, t.beginColumn, TipoNodo.litInt, padre);
+		terminalI.lexema = t.image;
+	}
+}
+
+void DOUBLE(NodoAST padre) :
+{Token t;}
+{
+	t= <DOUBLE_LITERAL>
+	{				
+		NodoAST terminalDouble = new NodoAST("LIT_DOU", t.beginLine, t.beginColumn, TipoNodo.litDouble, padre);
+		terminalDouble.lexema = t.image;
+	}
+}
+
+void BOOLEANO(NodoAST padre) :
+{Token t;}
+{
+	t= <TRUE>
+	{	NodoAST terminalBool = new NodoAST("LIT_BOOL",t.beginLine, t.beginColumn, TipoNodo.litBool, padre);	
+		terminalBool.lexema = t.image;		
+	}
+|	t= <FALSE>
+	{	NodoAST terminalBool2 = new NodoAST("LIT_BOOL",t.beginLine, t.beginColumn, TipoNodo.litBool, padre);				
+		terminalBool2.lexema = t.image;			
+	}
+}
+
+void STRING(NodoAST padre) :
+{Token t; NodoAST terminalStr;}
+{
+	t= <STRING_ENTRECOMILLADO_DOBLE>
+	{				
+		terminalStr = new NodoAST("LIT_STR", t.beginLine, t.beginColumn, TipoNodo.litStr, padre);
+		terminalStr.lexema = t.image;
+		terminalStr.lexema = terminalStr.lexema.substring(1, terminalStr.lexema.length()-1);
+	}
+|       t= <STRING_ENTRECOMILLADO_SIMPLE>
+	{				
+		terminalStr = new NodoAST("LIT_STR", t.beginLine, t.beginColumn, TipoNodo.litStr, padre);
+		terminalStr.lexema = t.image;
+		terminalStr.lexema = terminalStr.lexema.substring(1, terminalStr.lexema.length()-1);
+	}
+}
