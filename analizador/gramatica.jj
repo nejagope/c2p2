@@ -183,7 +183,16 @@ TOKEN :
 void INICIO(NodoAST raiz) :
 {}
 {
-    (EXPRESION(raiz)) [<EOF>]
+    ASIGNACION(raiz) [<EOF>]
+}
+
+
+
+void ASIGNACION(NodoAST padre) :
+{Token t; NodoAST nodoNuevo = new NodoAST("=", TipoNodo.asignacion, padre);	}
+{
+    VARIABLE(nodoNuevo) t = <IGUAL> EXPRESION(nodoNuevo)
+	{nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;}
 }
 
 void EXPRESION(NodoAST padre) :
@@ -298,10 +307,32 @@ void VARIABLE(NodoAST padre) :
 			nodoVar.etiqueta = "ARRAY";
 			nodoVar.tipo = TipoNodo.array;
 		}
+	}  [ATRIBUTO(nodoVar)]
+	{
+		if (nodoVar.tieneHijos() && nodoVar.getHijo(nodoVar.cantidadHijos()-1).tipo == TipoNodo.variable){
+			nodoVar.etiqueta = "ATRIBUTO";
+			nodoVar.tipo = TipoNodo.atributo;
+		}
 	}
 }
 
 
+
+void ATRIBUTO(NodoAST padre) :
+{Token t;}
+{
+	<FLECHA> ETIQUETA(padre)	
+}
+
+void ETIQUETA(NodoAST padre) :
+{Token t;}
+{
+	t= <ETIQUETA> 
+	{
+		NodoAST nodoEtiqueta = new NodoAST("VAR", t.beginLine, t.beginColumn, TipoNodo.variable, padre);
+		nodoEtiqueta.lexema = t.image;
+	}
+}
 
 void MAS(NodoAST padre):
 {Token t;}
