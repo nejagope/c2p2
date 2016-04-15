@@ -183,10 +183,44 @@ TOKEN :
 void INICIO(NodoAST raiz) :
 {}
 {
-    ASIGNACION(raiz) [<EOF>]
+    SENTENCIAS(raiz) [<EOF>]
 }
 
+void SENTENCIAS(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("SNTS", TipoNodo.sentencias, padre); Token t;}
+{
+    (SENTENCIA(nodoNuevo))+	
+}
 
+void BLOQUE_SENTENCIAS(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("SNTS", TipoNodo.sentencias, padre); Token t;}
+{
+    t= <LBRACE> (SENTENCIA(nodoNuevo))* <RBRACE>
+	{nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;}
+|	SENTENCIA(nodoNuevo)
+}
+
+void SENTENCIA(NodoAST padre) :
+{}
+{
+    ASIGNACION(padre) <PTOCOMA>
+|	SENT_IF(padre)
+|	SENT_FOR(padre)
+}
+
+void SENT_FOR(NodoAST padre) :
+{Token t; NodoAST nodoNuevo = new NodoAST("FOR", TipoNodo.FOR, padre);}
+{
+	t = <FOR> <LPAREN> ASIGNACION(nodoNuevo) <PTOCOMA> EXPRESION(nodoNuevo) <PTOCOMA> ASIGNACION(nodoNuevo) <RPAREN> BLOQUE_SENTENCIAS(nodoNuevo)
+	{nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;}
+}
+
+void SENT_IF(NodoAST padre) :
+{Token t; NodoAST nodoNuevo = new NodoAST("IF", TipoNodo.IF, padre);}
+{
+    t = <IF> <LPAREN> EXPRESION(nodoNuevo) <RPAREN> BLOQUE_SENTENCIAS(nodoNuevo) [LOOKAHEAD(1) <ELSE> BLOQUE_SENTENCIAS(nodoNuevo)]
+	{nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;}
+}
 
 void ASIGNACION(NodoAST padre) :
 {Token t; NodoAST nodoNuevo = new NodoAST("=", TipoNodo.asignacion, padre);	}

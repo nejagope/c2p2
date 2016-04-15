@@ -153,6 +153,9 @@ public class NodoAST {
         if (etiqueta.equals("DECLS")
             || etiqueta.equals("ARRAY")
 			|| etiqueta.equals("ATRIBUTO")
+			|| etiqueta.equals("IF")
+			|| etiqueta.equals("FOR")
+			|| etiqueta.equals("SNTS")
              || etiqueta.equals("=")) {
             NodoAST nuevo = this.clonar();
             for (NodoAST hijo : this.hijos) {
