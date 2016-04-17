@@ -377,17 +377,17 @@ void EXP_COMPARACION(NodoAST padre) :
 void EXP_REL(NodoAST padre) :
 {NodoAST nodoNuevo = new NodoAST("EXP_REL", padre);}
 {
-    EXP_SUM_RES(nodoNuevo) 
+    EXP_SUM_RES_CONCAT(nodoNuevo) 
 		[(MAYOR(nodoNuevo) | MENOR(nodoNuevo) | MAYORI(nodoNuevo) | MENORI(nodoNuevo)) 
-		EXP_SUM_RES(nodoNuevo)]
+		EXP_SUM_RES_CONCAT(nodoNuevo)]
 }
 
 //************************ OPERACIONES ARITMETICAS **********************************
 
-void EXP_SUM_RES(NodoAST padre) :
-{NodoAST nodoNuevo = new NodoAST("EXP_SUM_RES", padre);}
+void EXP_SUM_RES_CONCAT(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("EXP_SUM_RES_CONCAT", padre);}
 {
-    EXP_MUL_DIV_MOD(nodoNuevo) ((MAS(nodoNuevo) | MENOS(nodoNuevo)) EXP_MUL_DIV_MOD(nodoNuevo))*
+    EXP_MUL_DIV_MOD(nodoNuevo) ((MAS(nodoNuevo) | MENOS(nodoNuevo) | CONCATENACION(nodoNuevo)) EXP_MUL_DIV_MOD(nodoNuevo))*
 }
 
 void EXP_MUL_DIV_MOD(NodoAST padre) :
@@ -611,6 +611,13 @@ void NOT(NodoAST padre):
 {
 	t= <EXCLAMACION>
 	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.not, padre);}
+}
+
+void CONCATENACION(NodoAST padre):
+{Token t;}
+{
+	t= <PUNTO>
+	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.concat, padre);}
 }
 
 //************************* LITERALES ************************

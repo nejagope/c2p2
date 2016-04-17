@@ -10,7 +10,7 @@ package compilacion;
 public enum TipoNodo {
     indefinido,
     inc, dec,
-    mas, menos, por, div, potencia, modulo,
+    mas, menos, por, div, potencia, modulo, concat,
     menor, mayor, menorI, mayorI, igual, identico, noIgual, noIdentico,
     and, or, xor, not,
     litInt, litBool, litDouble, litStr,

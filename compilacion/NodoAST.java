@@ -184,7 +184,7 @@ public class NodoAST {
 				|| etiqueta.equals("EXP_XOR")
 				|| etiqueta.equals("EXP_AND")								
 				//------------------------
-				|| etiqueta.equals("EXP_SUM_RES") 
+				|| etiqueta.equals("EXP_SUM_RES_CONCAT") 
                 || etiqueta.equals("EXP_MUL_DIV_MOD")                 
                 || etiqueta.equals("EXP_POTENCIA")                 
                 || etiqueta.equals("EXP_UNARIA") 
