@@ -84,6 +84,13 @@ TOKEN :
 |	< TRUE: "true" >
 |	< FALSE: "false" >
 |	< ECHO: "echo" >
+|	< VAR: "var" >
+|	< CLASS: "class" >
+|	< NEW: "new" >
+|	< INCLUDE: "include" >
+|	< CONTINUE: "continue" >
+|	< PARENT: "parent" >
+|	< EXTENDS: "extends" >
 }
 
 /* LITERALS */
@@ -145,6 +152,7 @@ TOKEN :
 | < PTOCOMA: ";" >
 | < PUNTO: "." >
 | < DOSPUNTOS: ":" >
+| < DOSPUNTOS2: "::" >
 | < FLECHA: "->" >
 }
 
@@ -185,7 +193,27 @@ TOKEN :
 void INICIO(NodoAST raiz) :
 {}
 {
-    SENTENCIAS(raiz) [<EOF>]
+    ("<?php" | "<?" ) (INCLUDE(raiz))* (SENTENCIAS(raiz) | CLASE(raiz)) "?>" [<EOF>]
+}
+
+void INCLUDE(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("INCLUDE", TipoNodo.include, padre);}
+{
+	t= <INCLUDE> STRING(nodoNuevo) <PTOCOMA>
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+void CLASE(NodoAST padre) :
+{NodoAST nodoNuevo = new NodoAST("CLASE", TipoNodo.clase, padre); Token t;}
+{
+    t= <CLASS> ETIQUETA(nodoNuevo) [<EXTENDS> ETIQUETA(nodoNuevo)] <LBRACE> (DECLARACION_VAR_GLOBAL(nodoNuevo) | FUNCION(nodoNuevo))+ <RBRACE>
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
 }
 
 void SENTENCIAS(NodoAST padre) :
@@ -218,12 +246,47 @@ void SENTENCIA(NodoAST padre) :
 |	SWITCH(padre)
 |	FUNCION(padre)
 |	BREAK(padre) <PTOCOMA>
+|	CONTINUE(padre) <PTOCOMA>
+|	PARENT(padre) <PTOCOMA>
 }
+
+
+void DECLARACION_VAR_GLOBAL(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("DECL_VAR_GLOBAL", TipoNodo.decl_var_global, padre);}
+{
+	t= <VAR> ( LOOKAHEAD(ASIGNACION(nodoNuevo))ASIGNACION(nodoNuevo) | VARIABLE(nodoNuevo))	<PTOCOMA>
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+void PARENT(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("PARENT", TipoNodo.parent, padre);}
+{
+	t= <PARENT> <DOSPUNTOS2> (LLAMADA(nodoNuevo) | VARIABLE(nodoNuevo))
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
 
 void BREAK(NodoAST padre):
 {Token t; NodoAST nodoNuevo = new NodoAST("BREAK", TipoNodo.BREAK, padre);}
 {
 	t= <BREAK>
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+
+void CONTINUE(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("CONTINUE", TipoNodo.CONTINUE, padre);}
+{
+	t= <CONTINUE>
 	{
 		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
 		nodoNuevo.lexema = t.image;
@@ -261,6 +324,7 @@ void PARAMETRO(NodoAST padre):
 		NodoAST nodoVar = new NodoAST("VAR", t.beginLine, t.beginColumn, TipoNodo.variable, nodoNuevo);
 		nodoVar.lexema = t.image;
         nodoVar.lexema = nodoVar.lexema.substring(1, nodoVar.lexema.length());
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;
 	}
 }
 
@@ -299,7 +363,9 @@ void SENT_PTOCOMA(NodoAST padre):
 {}
 {
 	LOOKAHEAD(INC_DEC(padre)) INC_DEC(padre) 
-| 	ASIGNACION(padre)
+| 	LOOKAHEAD(ASIGNACION(padre)) ASIGNACION(padre)
+|	VARIABLE(padre)
+|	LLAMADA(padre)
 }
 
 void INC_DEC(NodoAST padre):
@@ -451,7 +517,30 @@ void EXP_MAYOR_PRECEDENCIA(NodoAST padre):
 {
     LITERAL(padre) 
 |   VARIABLE(padre) 
+|	LLAMADA(padre)
+|	PARENT(padre)
+|	NEW(padre)
 |   <LPAREN> EXPRESION(padre) <RPAREN>
+}
+
+void NEW(NodoAST padre) :
+{Token t; NodoAST nodoNuevo = new NodoAST("NEW", TipoNodo.NEW, padre);}
+{
+	t = <NEW> LLAMADA(nodoNuevo)
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+void LLAMADA(NodoAST padre) :
+{Token t; NodoAST nodoNuevo = new NodoAST("LLAMADA", TipoNodo.llamada, padre);}
+{
+	ETIQUETA(nodoNuevo) t = <LPAREN> [EXPRESION(nodoNuevo) (<COMA> EXPRESION(nodoNuevo))*] <RPAREN>
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
 }
 
 

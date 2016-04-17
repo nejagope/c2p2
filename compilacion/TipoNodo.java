@@ -20,4 +20,6 @@ public enum TipoNodo {
 	IF, FOR, WHILE, DO, RETURN, SWITCH, BREAK,  
 	sentencias, funcion, ref, parametro,
 	echo,
+	decl_var_global, clase,
+	llamada, NEW, include, CONTINUE, parent,
 }

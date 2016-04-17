@@ -167,6 +167,12 @@ public class NodoAST {
 			|| etiqueta.equals("ECHO")
 			|| etiqueta.equals("FUNCION")
 			|| etiqueta.equals("PARAM")
+			|| etiqueta.equals("LLAMADA")
+			|| etiqueta.equals("NEW")
+			|| etiqueta.equals("INCLUDE")
+			|| etiqueta.equals("DECL_VAR_GLOBAL")
+			|| etiqueta.equals("CLASE")
+			|| etiqueta.equals("PARENT")
             || etiqueta.equals("=")) {
             NodoAST nuevo = this.clonar();
             for (NodoAST hijo : this.hijos) {
@@ -180,6 +186,7 @@ public class NodoAST {
                 || etiqueta.equals("LIT_BOOL")
 				|| etiqueta.equals("VAR")
 				|| etiqueta.equals("BREAK")
+				|| etiqueta.equals("CONTINUE")
 				|| etiqueta.equals("REF")) {            
             return this.clonar();
         } 
