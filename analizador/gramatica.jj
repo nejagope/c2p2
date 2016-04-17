@@ -196,37 +196,138 @@ void BLOQUE_SENTENCIAS(NodoAST padre) :
 {NodoAST nodoNuevo = new NodoAST("SNTS", TipoNodo.sentencias, padre); Token t;}
 {
     t= <LBRACE> (SENTENCIA(nodoNuevo))* <RBRACE>
-	{nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;}
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
 |	SENTENCIA(nodoNuevo)
 }
 
 void SENTENCIA(NodoAST padre) :
 {}
 {
-    ASIGNACION(padre) <PTOCOMA>
+   SENT_PTOCOMA(padre) <PTOCOMA>
 |	SENT_IF(padre)
-|	SENT_FOR(padre)
+|	FOR(padre)
+|	DO(padre) 
+|	WHILE(padre)
+|	RETURN(padre) <PTOCOMA>
+|	FUNCION(padre)
 }
 
-void SENT_FOR(NodoAST padre) :
+void FUNCION(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("FUNCION", TipoNodo.funcion, padre);}
+{
+	t= <FUNCTION> ETIQUETA(nodoNuevo) <LPAREN> [PARAMETRO(nodoNuevo) (<COMA> PARAMETRO(nodoNuevo))*] <RPAREN> BLOQUE_SENTENCIAS(nodoNuevo)
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+void PARAMETRO(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("PARAM", TipoNodo.parametro, padre);}
+{
+	[AMPERSAND(nodoNuevo)] t= <VARIABLE>
+	{
+		NodoAST nodoVar = new NodoAST("VAR", t.beginLine, t.beginColumn, TipoNodo.variable, nodoNuevo);
+		nodoVar.lexema = t.image;
+        nodoVar.lexema = nodoVar.lexema.substring(1, nodoVar.lexema.length());
+	}
+}
+
+void AMPERSAND(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("REF", TipoNodo.ref, padre);}
+{
+	t = <AMPERSAND>
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+
+
+void RETURN(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("RETURN", TipoNodo.RETURN, padre);}
+{
+	t= <RETURN> [EXPRESION(nodoNuevo)]
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+
+void SENT_PTOCOMA(NodoAST padre):
+{}
+{
+	LOOKAHEAD(INC_DEC(padre)) INC_DEC(padre) 
+| 	ASIGNACION(padre)
+}
+
+void INC_DEC(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("++", TipoNodo.inc, padre);}
+{
+	VARIABLE(nodoNuevo) (t= <MAS2> | t=<GUION2>)
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+		nodoNuevo.etiqueta = t.image;
+		if (t.image.equals("--"))
+			nodoNuevo.tipo = TipoNodo.dec;
+	}
+	
+}
+
+void DO(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("DO", TipoNodo.DO, padre);}
+{
+	t = <DO> BLOQUE_SENTENCIAS(nodoNuevo) <WHILE> <LPAREN> EXPRESION(nodoNuevo) <RPAREN> <PTOCOMA>
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+void WHILE(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("WHILE", TipoNodo.WHILE, padre);}
+{
+	t = <WHILE> <LPAREN> EXPRESION(nodoNuevo) <RPAREN> BLOQUE_SENTENCIAS(nodoNuevo)
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+void FOR(NodoAST padre) :
 {Token t; NodoAST nodoNuevo = new NodoAST("FOR", TipoNodo.FOR, padre);}
 {
-	t = <FOR> <LPAREN> ASIGNACION(nodoNuevo) <PTOCOMA> EXPRESION(nodoNuevo) <PTOCOMA> ASIGNACION(nodoNuevo) <RPAREN> BLOQUE_SENTENCIAS(nodoNuevo)
-	{nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;}
+	t = <FOR> <LPAREN> [SENT_PTOCOMA(nodoNuevo)] <PTOCOMA> EXPRESION(nodoNuevo) <PTOCOMA> [SENT_PTOCOMA(nodoNuevo)] <RPAREN> BLOQUE_SENTENCIAS(nodoNuevo)
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
 }
 
 void SENT_IF(NodoAST padre) :
 {Token t; NodoAST nodoNuevo = new NodoAST("IF", TipoNodo.IF, padre);}
 {
     t = <IF> <LPAREN> EXPRESION(nodoNuevo) <RPAREN> BLOQUE_SENTENCIAS(nodoNuevo) [LOOKAHEAD(1) <ELSE> BLOQUE_SENTENCIAS(nodoNuevo)]
-	{nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;}
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
 }
 
 void ASIGNACION(NodoAST padre) :
 {Token t; NodoAST nodoNuevo = new NodoAST("=", TipoNodo.asignacion, padre);	}
 {
     VARIABLE(nodoNuevo) t = <IGUAL> EXPRESION(nodoNuevo)
-	{nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;}
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
 }
 
 void EXPRESION(NodoAST padre) :
@@ -410,20 +511,7 @@ void POTENCIA(NodoAST padre):
 	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.potencia, padre);}
 }
 
-void INC(NodoAST padre):
-{Token t;}
-{
-	t= <MAS2>
-	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.inc, padre);}
-}
 
-
-void DEC(NodoAST padre):
-{Token t;}
-{
-	t= <GUION2>
-	{NodoAST nodo = new NodoAST(t.image, t.beginLine, t.beginColumn, TipoNodo.dec, padre);}
-}
 
 void MENOR(NodoAST padre):
 {Token t;}

@@ -106,11 +106,13 @@ public class NodoAST {
                 || this.tipo == TipoNodo.litDouble || this.tipo == TipoNodo.litBool || this.tipo == TipoNodo.array) {
             contenido += this.etiqueta + "\\n(" + this.lexema + ")\\n"
                    + "[" + this.linea + "," + this.columna + "]\\n" 
+				   + "Tipo: " + tipo + "\\n"
                    + "\"];";
         } else {
             //contenido += this.etiqueta + "\"];";
             contenido += this.etiqueta + "\\n(" + this.lexema + ")\\n"
                    + "[" + this.linea + "," + this.columna + "]\\n" 
+				   + "Tipo: " + tipo + "\\n"
                    + "\"];";
         }
         for (NodoAST hijo : this.hijos) {
@@ -156,7 +158,14 @@ public class NodoAST {
 			|| etiqueta.equals("IF")
 			|| etiqueta.equals("FOR")
 			|| etiqueta.equals("SNTS")
-             || etiqueta.equals("=")) {
+			|| etiqueta.equals("++")
+			|| etiqueta.equals("--")
+			|| etiqueta.equals("WHILE")
+			|| etiqueta.equals("DO")
+			|| etiqueta.equals("RETURN")
+			|| etiqueta.equals("FUNCION")
+			|| etiqueta.equals("PARAM")
+            || etiqueta.equals("=")) {
             NodoAST nuevo = this.clonar();
             for (NodoAST hijo : this.hijos) {
                 nuevo.agregarHijo(hijo.resumir());
@@ -167,7 +176,8 @@ public class NodoAST {
                 || etiqueta.equals("LIT_STR")                  
                 || etiqueta.equals("LIT_DOU") 
                 || etiqueta.equals("LIT_BOOL")
-				|| etiqueta.equals("VAR")) {            
+				|| etiqueta.equals("VAR")
+				|| etiqueta.equals("REF")) {            
             return this.clonar();
         } 
         else if (etiqueta.equals("EXP_OR")

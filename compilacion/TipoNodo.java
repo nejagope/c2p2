@@ -17,6 +17,6 @@ public enum TipoNodo {
     variable, array,
 	asignacion,
 	atributo,
-	IF, FOR,
-	sentencias,
+	IF, FOR, WHILE, DO, RETURN, 
+	sentencias, funcion, ref, parametro,
 }
