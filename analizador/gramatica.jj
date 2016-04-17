@@ -83,6 +83,7 @@ TOKEN :
 |	< RETURN: "return" >
 |	< TRUE: "true" >
 |	< FALSE: "false" >
+|	< ECHO: "echo" >
 }
 
 /* LITERALS */
@@ -143,6 +144,7 @@ TOKEN :
 
 | < PTOCOMA: ";" >
 | < PUNTO: "." >
+| < DOSPUNTOS: ":" >
 | < FLECHA: "->" >
 }
 
@@ -212,7 +214,33 @@ void SENTENCIA(NodoAST padre) :
 |	DO(padre) 
 |	WHILE(padre)
 |	RETURN(padre) <PTOCOMA>
+|	ECHO(padre) <PTOCOMA>
+|	SWITCH(padre)
 |	FUNCION(padre)
+|	BREAK(padre) <PTOCOMA>
+}
+
+void BREAK(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("BREAK", TipoNodo.BREAK, padre);}
+{
+	t= <BREAK>
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+void SWITCH(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("SWITCH", TipoNodo.SWITCH, padre);}
+{
+	t= <SWITCH> <LPAREN> EXPRESION(nodoNuevo) <RPAREN> <LBRACE> 
+		(<CASE> EXPRESION(nodoNuevo) <DOSPUNTOS> SENTENCIAS(nodoNuevo))+
+		[<DEFAULT_> <DOSPUNTOS> SENTENCIAS(nodoNuevo)]
+		<RBRACE>
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
 }
 
 void FUNCION(NodoAST padre):
@@ -247,7 +275,6 @@ void AMPERSAND(NodoAST padre):
 }
 
 
-
 void RETURN(NodoAST padre):
 {Token t; NodoAST nodoNuevo = new NodoAST("RETURN", TipoNodo.RETURN, padre);}
 {
@@ -258,6 +285,15 @@ void RETURN(NodoAST padre):
 	}
 }
 
+void ECHO(NodoAST padre):
+{Token t; NodoAST nodoNuevo = new NodoAST("ECHO", TipoNodo.echo, padre);}
+{
+	t= <ECHO> EXPRESION(nodoNuevo)
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
 
 void SENT_PTOCOMA(NodoAST padre):
 {}

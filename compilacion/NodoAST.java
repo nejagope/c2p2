@@ -163,6 +163,8 @@ public class NodoAST {
 			|| etiqueta.equals("WHILE")
 			|| etiqueta.equals("DO")
 			|| etiqueta.equals("RETURN")
+			|| etiqueta.equals("SWITCH")			
+			|| etiqueta.equals("ECHO")
 			|| etiqueta.equals("FUNCION")
 			|| etiqueta.equals("PARAM")
             || etiqueta.equals("=")) {
@@ -177,6 +179,7 @@ public class NodoAST {
                 || etiqueta.equals("LIT_DOU") 
                 || etiqueta.equals("LIT_BOOL")
 				|| etiqueta.equals("VAR")
+				|| etiqueta.equals("BREAK")
 				|| etiqueta.equals("REF")) {            
             return this.clonar();
         } 
