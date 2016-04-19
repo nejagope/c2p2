@@ -50,7 +50,7 @@ public class Compilador {
     public NodoAST getAST(String nombreArchivo){
         try{
             Parser parser = new Parser(new java.io.FileInputStream(Global.carpetaRaiz + nombreArchivo));
-            NodoAST ast = new NodoAST("DECLS", null);
+            NodoAST ast = new NodoAST("DECLS", TipoNodo.raiz, null);
             parser.INICIO(ast);
             ast = ast.resumir(); 
             //se asignan a todos los nodos el nombre del archivo fuente en el que están definidos

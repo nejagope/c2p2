@@ -8,7 +8,7 @@ package compilacion;
  * @author Nelson Jair
  */
 public enum TipoNodo {
-    indefinido,
+    indefinido, raiz, 
     inc, dec,
     mas, menos, por, div, potencia, modulo, concat,
     menor, mayor, menorI, mayorI, igual, identico, noIgual, noIdentico,
