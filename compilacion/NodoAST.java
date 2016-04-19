@@ -106,13 +106,15 @@ public class NodoAST {
                 || this.tipo == TipoNodo.litDouble || this.tipo == TipoNodo.litBool || this.tipo == TipoNodo.array) {
             contenido += this.etiqueta + "\\n(" + this.lexema + ")\\n"
                    + "[" + this.linea + "," + this.columna + "]\\n" 
-				   + "Tipo: " + tipo + "\\n"
+                   + "Tipo: " + tipo + "\\n"
+                   + "File: " + archivoFuente + "\\n"
                    + "\"];";
         } else {
             //contenido += this.etiqueta + "\"];";
             contenido += this.etiqueta + "\\n(" + this.lexema + ")\\n"
                    + "[" + this.linea + "," + this.columna + "]\\n" 
-				   + "Tipo: " + tipo + "\\n"
+                   + "Tipo: " + tipo + "\\n"
+                   + "File: " + archivoFuente + "\\n"
                    + "\"];";
         }
         for (NodoAST hijo : this.hijos) {

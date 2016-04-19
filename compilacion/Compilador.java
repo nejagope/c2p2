@@ -54,7 +54,7 @@ public class Compilador {
             parser.INICIO(ast);
             ast = ast.resumir(); 
             //se asignan a todos los nodos el nombre del archivo fuente en el que están definidos
-            ast.asignarNombreArchivoFuente(nombreArchivo);
+            ast.asignarNombreArchivoFuente(Global.carpetaRaiz + nombreArchivo);
             for (NodoAST hijo: ast.hijos){
                 if (hijo.tipo == TipoNodo.include){
                     NodoAST astIncluido = getAST(Global.carpetaRaiz + hijo.getHijo(0).lexema);
