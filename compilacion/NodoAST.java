@@ -273,4 +273,11 @@ public class NodoAST {
         else
             return (getHijo(0));
     }
+    
+    public void asignarNombreArchivoFuente(String nombreArchivo){
+        this.archivoFuente = nombreArchivo;
+        for (NodoAST hijo : this.hijos) {
+            hijo.asignarNombreArchivoFuente(nombreArchivo);
+        }
+    }
 }

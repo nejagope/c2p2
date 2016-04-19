@@ -52,7 +52,9 @@ public class Compilador {
             Parser parser = new Parser(new java.io.FileInputStream(Global.carpetaRaiz + nombreArchivo));
             NodoAST ast = new NodoAST("DECLS", null);
             parser.INICIO(ast);
-            ast = ast.resumir();                        
+            ast = ast.resumir(); 
+            //se asignan a todos los nodos el nombre del archivo fuente en el que están definidos
+            ast.asignarNombreArchivoFuente(nombreArchivo);
             for (NodoAST hijo: ast.hijos){
                 if (hijo.tipo == TipoNodo.include){
                     NodoAST astIncluido = getAST(Global.carpetaRaiz + hijo.getHijo(0).lexema);
