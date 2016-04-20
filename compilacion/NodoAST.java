@@ -187,6 +187,7 @@ public class NodoAST {
                 || etiqueta.equals("LIT_DOU") 
                 || etiqueta.equals("LIT_BOOL")
 				|| etiqueta.equals("VAR")
+                                || etiqueta.equals("ETIQUETA")
 				|| etiqueta.equals("BREAK")
 				|| etiqueta.equals("CONTINUE")
 				|| etiqueta.equals("REF")) {            

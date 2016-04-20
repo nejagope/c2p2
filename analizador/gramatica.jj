@@ -254,7 +254,8 @@ void SENTENCIA(NodoAST padre) :
 void DECLARACION_VAR_GLOBAL(NodoAST padre):
 {Token t; NodoAST nodoNuevo = new NodoAST("DECL_VAR_GLOBAL", TipoNodo.decl_var_global, padre);}
 {
-	t= <VAR> ( LOOKAHEAD(ASIGNACION(nodoNuevo))ASIGNACION(nodoNuevo) | VARIABLE(nodoNuevo))	<PTOCOMA>
+	t= <VAR> ( LOOKAHEAD(ASIGNACION(nodoNuevo))ASIGNACION(nodoNuevo) | VARIABLE(nodoNuevo))	
+        (<COMA> (LOOKAHEAD(ASIGNACION(nodoNuevo))ASIGNACION(nodoNuevo) | VARIABLE(nodoNuevo)))* <PTOCOMA>
 	{
 		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
 		nodoNuevo.lexema = t.image;
@@ -589,7 +590,7 @@ void ETIQUETA(NodoAST padre) :
 {
 	t= <ETIQUETA> 
 	{
-		NodoAST nodoEtiqueta = new NodoAST("VAR", t.beginLine, t.beginColumn, TipoNodo.variable, padre);
+		NodoAST nodoEtiqueta = new NodoAST("ETIQUETA", t.beginLine, t.beginColumn, TipoNodo.etiqueta, padre);
 		nodoEtiqueta.lexema = t.image;
 	}
 }
