@@ -30,6 +30,8 @@ public class Compilador {
         ast = getAST(Global.carpetaRaiz + nombreArchivo); 
         if (ast != null){
             Global.asignarIDSNodos(ast);
+            //lenar tabla de símbolos
+            tablaSimbolos.llenar(ast,null);
             return true;
         }else{
             return false;
