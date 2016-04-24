@@ -175,6 +175,7 @@ public class NodoAST {
 			|| etiqueta.equals("DECL_VAR_GLOBAL")
 			|| etiqueta.equals("CLASE")
 			|| etiqueta.equals("PARENT")
+			|| etiqueta.equals("COMPORTAMIENTO")
             || etiqueta.equals("=")) {
             NodoAST nuevo = this.clonar();
             for (NodoAST hijo : this.hijos) {

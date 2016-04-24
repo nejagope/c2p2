@@ -96,7 +96,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
     private void btnCompilarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompilarActionPerformed
         Compilador compilador = new Compilador();
-        boolean res = compilador.compilar("prueba.php");                      
+        boolean res = compilador.compilar("main.php");                      
         if (res){
             txtResultados.append("Codigo compilado correctamente\n");
             compilador.graficarAST("prueba");

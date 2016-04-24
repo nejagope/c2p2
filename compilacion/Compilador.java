@@ -32,7 +32,9 @@ public class Compilador {
             Global.asignarIDSNodos(ast);
             //lenar tabla de símbolos
             tablaSimbolos.llenar(ast,null);
-            return true;
+            if (errores.isEmpty())
+                return true;
+            return false;
         }else{
             return false;
         }

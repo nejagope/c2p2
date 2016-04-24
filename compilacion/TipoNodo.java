@@ -21,5 +21,5 @@ public enum TipoNodo {
 	sentencias, funcion, ref, parametro,
 	echo,
 	decl_var_global, clase,
-	llamada, NEW, include, CONTINUE, parent,
+	llamada, NEW, include, CONTINUE, parent, comportamiento,
 }

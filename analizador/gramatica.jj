@@ -235,7 +235,7 @@ void BLOQUE_SENTENCIAS(NodoAST padre) :
 
 void SENTENCIA(NodoAST padre) :
 {}
-{
+{	
    SENT_PTOCOMA(padre) <PTOCOMA>
 |	SENT_IF(padre)
 |	FOR(padre)
@@ -250,6 +250,15 @@ void SENTENCIA(NodoAST padre) :
 |	PARENT(padre) <PTOCOMA>
 }
 
+void SENT_PTOCOMA(NodoAST padre):
+{}
+{
+	LOOKAHEAD(COMPORTAMIENTO(padre))COMPORTAMIENTO(padre)
+|	LOOKAHEAD(INC_DEC(padre)) INC_DEC(padre) 
+| 	LOOKAHEAD(ASIGNACION(padre)) ASIGNACION(padre)
+|	LLAMADA(padre)
+|	VARIABLE(padre)
+}
 
 void DECLARACION_VAR_GLOBAL(NodoAST padre):
 {Token t; NodoAST nodoNuevo = new NodoAST("DECL_VAR_GLOBAL", TipoNodo.decl_var_global, padre);}
@@ -360,15 +369,6 @@ void ECHO(NodoAST padre):
 	}
 }
 
-void SENT_PTOCOMA(NodoAST padre):
-{}
-{
-	LOOKAHEAD(INC_DEC(padre)) INC_DEC(padre) 
-| 	LOOKAHEAD(ASIGNACION(padre)) ASIGNACION(padre)
-|	VARIABLE(padre)
-|	LLAMADA(padre)
-}
-
 void INC_DEC(NodoAST padre):
 {Token t; NodoAST nodoNuevo = new NodoAST("++", TipoNodo.inc, padre);}
 {
@@ -426,7 +426,7 @@ void SENT_IF(NodoAST padre) :
 void ASIGNACION(NodoAST padre) :
 {Token t; NodoAST nodoNuevo = new NodoAST("=", TipoNodo.asignacion, padre);	}
 {
-    VARIABLE(nodoNuevo) t = <IGUAL> EXPRESION(nodoNuevo)
+    (LOOKAHEAD(ATRIBUTO(nodoNuevo))ATRIBUTO(nodoNuevo)|VARIABLE(nodoNuevo)) t = <IGUAL> EXPRESION(nodoNuevo)
 	{
 		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
 		nodoNuevo.lexema = t.image;
@@ -516,7 +516,9 @@ void EXP_UNARIA(NodoAST padre) :
 void EXP_MAYOR_PRECEDENCIA(NodoAST padre):
 {}
 {
-    LITERAL(padre) 
+    LITERAL(padre)
+|	LOOKAHEAD(ATRIBUTO(padre))ATRIBUTO(padre)
+|	LOOKAHEAD(COMPORTAMIENTO(padre))COMPORTAMIENTO(padre)
 |   VARIABLE(padre) 
 |	LLAMADA(padre)
 |	PARENT(padre)
@@ -538,6 +540,16 @@ void LLAMADA(NodoAST padre) :
 {Token t; NodoAST nodoNuevo = new NodoAST("LLAMADA", TipoNodo.llamada, padre);}
 {
 	ETIQUETA(nodoNuevo) t = <LPAREN> [EXPRESION(nodoNuevo) (<COMA> EXPRESION(nodoNuevo))*] <RPAREN>
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
+}
+
+void COMPORTAMIENTO(NodoAST padre) :
+{Token t; NodoAST nodoNuevo = new NodoAST("COMPORTAMIENTO", TipoNodo.comportamiento, padre);}
+{
+	VARIABLE(nodoNuevo) t = <FLECHA> LLAMADA(nodoNuevo)	
 	{
 		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
 		nodoNuevo.lexema = t.image;
@@ -568,21 +580,18 @@ void VARIABLE(NodoAST padre) :
 			nodoVar.etiqueta = "ARRAY";
 			nodoVar.tipo = TipoNodo.array;
 		}
-	}  [ATRIBUTO(nodoVar)]
-	{
-		if (nodoVar.tieneHijos() && nodoVar.getHijo(nodoVar.cantidadHijos()-1).tipo == TipoNodo.variable){
-			nodoVar.etiqueta = "ATRIBUTO";
-			nodoVar.tipo = TipoNodo.atributo;
-		}
-	}
+	}  	
 }
 
 
-
 void ATRIBUTO(NodoAST padre) :
-{Token t;}
+{Token t; NodoAST nodoNuevo = new NodoAST("ATRIBUTO", TipoNodo.atributo, padre);}
 {
-	<FLECHA> ETIQUETA(padre)	
+	VARIABLE(nodoNuevo) t = <FLECHA> ETIQUETA(nodoNuevo)	
+	{
+		nodoNuevo.linea = t.beginLine; nodoNuevo.columna = t.beginColumn;		
+		nodoNuevo.lexema = t.image;
+	}
 }
 
 void ETIQUETA(NodoAST padre) :
